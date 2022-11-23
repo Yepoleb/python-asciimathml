@@ -118,10 +118,9 @@ def sub(base, subscript):
     subscript = strip_parens(subscript)
 
     if base.tag in ('msup', 'mover'):
-        children = base.getchildren()
         n = element_factory(
             'msubsup' if base.tag == 'msup' else 'munderover',
-            children[0], subscript, children[1]
+            base[0], subscript, base[1]
         )
     else:
         n = element_factory(
@@ -135,10 +134,9 @@ def sup(base, superscript):
     superscript = strip_parens(superscript)
 
     if base.tag in ('msub', 'munder'):
-        children = base.getchildren()
         n = element_factory(
             'msubsup' if base.tag == 'msub' else 'munderover',
-            children[0], children[1], superscript
+            base[0], base[1], superscript
         )
     else:
         n = element_factory(
@@ -319,7 +317,7 @@ def find_node_backwards(ns, text):
 def nodes_to_row(row):
     mrow = element_factory('mtr')
 
-    nodes = row.getchildren()
+    nodes = list(row)
 
     while True:
         i = find_node(nodes, ',')
@@ -408,7 +406,7 @@ def remove_private(n):
     for _k in _ks:
         del n.attrib[_k]
 
-    for c in n.getchildren():
+    for c in n:
         remove_private(c)
 
     return n
@@ -421,12 +419,12 @@ def remove_invisible(ns, parent=None):
             else:
                 parent.remove(ns[i])
         else:
-            remove_invisible(ns[i].getchildren(), parent=ns[i])
+            remove_invisible(list(ns[i]), parent=ns[i])
 
 def copy(n):
     m = element_factory(n.tag, n.text, **dict(n.items()))
 
-    for c in n.getchildren():
+    for c in n:
         m.append(copy(c))
 
     return m
